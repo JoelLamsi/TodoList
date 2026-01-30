@@ -3,16 +3,10 @@ import { FlatList, StyleSheet, Text, TextInput, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react';
 import Row from './components/Row'
-
-type Todo = {
-  id: number;
-  title: string;
-  description: string;
-  dueDate: string;
-  isDone: boolean;
-}
+import {Todo} from './types/Todo'
 
 const AS_KEY: string = 'TodoListStorage'
+let itemCount: number = 0
 
 export default function App() {
   const [newTodo, setNewTodo] = useState<string>('')
@@ -28,7 +22,7 @@ export default function App() {
       const json = await AsyncStorage.getItem(AS_KEY)
       if (json !== null) {
         setTodos(JSON.parse(json))
-      }
+      } 
     } catch (e) {
       console.log('Error occured while fetching todos:', e)
     }
@@ -44,16 +38,15 @@ export default function App() {
 
   const addTodo = () => {
     if (!newTodo.trim()) return
-
+    itemCount++
     const item: Todo = {
-      id: todos.length + 1,
+      id: itemCount,
       title: newTodo,
-      description: '',
-      dueDate: '',
       isDone: false
     }
 
     const updatedList = [...todos, item]
+    
     setTodos(updatedList)
     storeTodos(updatedList)
     setNewTodo('')
@@ -61,6 +54,7 @@ export default function App() {
 
   const deleteTodo = (id: number) => {
     const updatedList = todos.filter(t => t.id !== id)
+    itemCount--
     setTodos(updatedList)
     storeTodos(updatedList)
   }
